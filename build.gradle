@@ -17,8 +17,11 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.jfrog.bintray' version '1.8.1'
+}
+
 apply plugin: 'idea'
-apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'org.ajoberstar.grgit'
@@ -28,21 +31,19 @@ apply plugin: 'org.sonarqube'
 apply plugin: 'com.github.ben-manes.versions'
 
 
-group = "space.npstr.magma"
-version = "${versionFromTag()}"
+group = 'club.minnced'
+version = "0.1.0"
+archivesBaseName = project.name
 
-sourceCompatibility = 8
-targetCompatibility = 8
+sourceCompatibility = targetCompatibility = 1.8
 
 repositories {
     jcenter()
-    mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
 ext {
     //@formatter:off
-    gradleVersion               = '4.10.2'
     jacocoVersion               = '0.8.2' // the default one, 0.8.1, breaks on java 11+
 
     orgJsonVersion              = '20180813'
@@ -58,7 +59,6 @@ ext {
 
     junitVersion                = '5.3.1'
     logbackVersion              = '1.2.3'
-
     //@formatter:on
 }
 
@@ -73,7 +73,7 @@ dependencies {
 
     // annotations
     compileOnly         group: 'com.github.spotbugs',   name: 'spotbugs-annotations',   version: spotbugsVersion
-    compileOnly         group: 'space.npstr',           name: 'annotations',            version: annotationsVersion
+    compileOnly         group: 'space.npstr',           name: 'annotations',            version: annotationsVersion //todo replace with findBugs
 
     // immutable objects, to pass values around
     annotationProcessor group: 'org.immutables',        name: 'value',                  version: immutablesVersion
@@ -87,17 +87,10 @@ dependencies {
 }
 
 compileJava {
-    dependsOn(clean)
     options.encoding = 'UTF-8'
+    options.incremental = true
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
-
-wrapper {
-    gradleVersion = project.ext.gradleVersion
-    //noinspection UnnecessaryQualifiedReference
-    distributionType = Wrapper.DistributionType.ALL
-}
-
 
 build {
     doLast {
@@ -120,54 +113,59 @@ sonarqube {
     }
 }
 
-jar.mustRunAfter clean
 publishToMavenLocal.dependsOn jar
-// called by jitpack
-task install {
-    dependsOn test
-    dependsOn publishToMavenLocal
-    doLast {
-        println 'Version: ' + version
-    }
-}
+
 task sourceJar(type: Jar) {
     from sourceSets.main.allJava
     classifier 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact sourceJar
             groupId project.group
-            artifactId project.name
+            artifactId archivesBaseName
             version project.version
-            pom {
-                name = 'Magma'
-                description = 'A voice only API for Discord, focused on delivering music at scale.'
-                url = 'https://github.com/napstr/Magma'
-                licenses {
-                    license {
-                        name = 'Apache License 2.0'
-                        url = 'https://choosealicense.com/licenses/apache-2.0/'
-                        distribution = 'repo'
-                    }
-                }
-                developers {
-                    developer {
-                        name = 'Napster'
-                        email = 'napster@npstr.space'
-                    }
-                }
-                scm {
-                    url = 'https://github.com/napstr/Magma'
-                }
-            }
+
+            artifact sourceJar
+            artifact javadocJar
         }
     }
 }
 
+bintray {
+    user = this.properties["bintrayUsername"]
+    key = this.properties["bintrayApiKey"]
+    publications = ["mavenJava"]
+    pkg {
+        repo = "maven"
+        name = archivesBaseName
+        licenses = ["Apache-2.0"]
+        vcsUrl = "https://github.com/MinnDevelopment/Magma"
+        githubRepo = "MinnDevelopment/Magma"
+        publish = true
+        version {
+            name = project.version
+            vcsTag = project.version
+            released = new Date()
+            gpg.sign = true
+        }
+    }
+}
+
+bintrayUpload {
+    dependsOn clean
+    dependsOn build
+    dependsOn javadocJar
+    dependsOn sourceJar
+    build.mustRunAfter clean
+}
 
 idea {
     project {
@@ -186,7 +184,6 @@ idea {
 //returns either a git tag if there is one on this commit, or the commit hash, to be used as a version
 @SuppressWarnings("GrMethodMayBeStatic")
 String versionFromTag() {
-
     def headTag = grgit.tag.list().find {
         it.commit == grgit.head()
     }
