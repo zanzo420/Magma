@@ -31,8 +31,8 @@ apply plugin: 'com.github.ben-manes.versions'
 group = "space.npstr.magma"
 version = "${versionFromTag()}"
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 8
+targetCompatibility = 8
 
 repositories {
     jcenter()
