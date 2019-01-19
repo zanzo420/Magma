@@ -33,8 +33,7 @@ public enum SpeakingMode {
         return key;
     }
 
-    public static int toMask(@Nullable EnumSet<SpeakingMode> mode)
-    {
+    public static int toMask(@Nullable EnumSet<SpeakingMode> mode) {
         if (mode == null || mode.isEmpty())
             return 0;
         int mask = 0;
