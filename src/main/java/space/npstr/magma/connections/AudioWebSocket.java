@@ -16,6 +16,7 @@
 
 package space.npstr.magma.connections;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,24 +39,10 @@ import space.npstr.magma.events.audio.lifecycle.CloseWebSocketLcEvent;
 import space.npstr.magma.events.audio.ws.CloseCode;
 import space.npstr.magma.events.audio.ws.Speaking;
 import space.npstr.magma.events.audio.ws.SpeakingWsEvent;
-import space.npstr.magma.events.audio.ws.in.ClientDisconnect;
-import space.npstr.magma.events.audio.ws.in.HeartbeatAck;
-import space.npstr.magma.events.audio.ws.in.Hello;
-import space.npstr.magma.events.audio.ws.in.Ignored;
-import space.npstr.magma.events.audio.ws.in.InboundWsEvent;
-import space.npstr.magma.events.audio.ws.in.Ready;
-import space.npstr.magma.events.audio.ws.in.Resumed;
-import space.npstr.magma.events.audio.ws.in.SessionDescription;
-import space.npstr.magma.events.audio.ws.in.Unknown;
-import space.npstr.magma.events.audio.ws.in.WebSocketClosed;
-import space.npstr.magma.events.audio.ws.out.HeartbeatWsEvent;
-import space.npstr.magma.events.audio.ws.out.IdentifyWsEvent;
-import space.npstr.magma.events.audio.ws.out.OutboundWsEvent;
-import space.npstr.magma.events.audio.ws.out.ResumeWsEvent;
-import space.npstr.magma.events.audio.ws.out.SelectProtocolWsEvent;
+import space.npstr.magma.events.audio.ws.in.*;
+import space.npstr.magma.events.audio.ws.out.*;
 import space.npstr.magma.immutables.SessionInfo;
 
-import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -123,10 +110,9 @@ public class AudioWebSocket extends BaseSubscriber<InboundWsEvent> {
         return this.audioConnection;
     }
 
-    public void setSpeaking(final boolean isSpeaking, final int ssrc) {
-        final int speakingMask = isSpeaking ? 1 : 0;
+    public void setSpeaking(final int speaking, final int ssrc) {
         sendWhenReady(SpeakingWsEvent.builder()
-                .speakingMask(speakingMask)
+                .speakingMask(speaking)
                 .ssrc(ssrc)
                 .build());
     }
@@ -163,14 +149,12 @@ public class AudioWebSocket extends BaseSubscriber<InboundWsEvent> {
                 this.handleReady((Ready) inboundEvent);
             } else if (inboundEvent instanceof SessionDescription) {
                 this.handleSessionDescription((SessionDescription) inboundEvent);
-            } else if (inboundEvent instanceof HeartbeatAck) {
+            } else if (inboundEvent instanceof HeartbeatAck
+                    || inboundEvent instanceof Speaking
+                    || inboundEvent instanceof ClientDisconnect) {
                 // noop
             } else if (inboundEvent instanceof WebSocketClosed) {
                 this.handleWebSocketClosed((WebSocketClosed) inboundEvent);
-            } else if (inboundEvent instanceof ClientDisconnect) {
-                // noop
-            } else if (inboundEvent instanceof Speaking) {
-                // noop
             } else if (inboundEvent instanceof Resumed) {
                 this.handleResumed();
             } else if (inboundEvent instanceof Ignored) {
@@ -218,7 +202,7 @@ public class AudioWebSocket extends BaseSubscriber<InboundWsEvent> {
         if (!preferredModeOpt.isPresent()) {
             final String modes = receivedModes.isEmpty()
                     ? "empty list"
-                    : String.join(", ", receivedModes.stream().map(Enum::name).collect(Collectors.toList()));
+                    : receivedModes.stream().map(Enum::name).collect(Collectors.joining(", "));
             throw new RuntimeException("Failed to select encryption modes from " + modes); //todo how are exceptions handled?
         }
         final EncryptionMode preferredMode = preferredModeOpt.get();
@@ -257,7 +241,7 @@ public class AudioWebSocket extends BaseSubscriber<InboundWsEvent> {
             final CloseCode closeCode = closeCodeOpt.get();
             resume = closeCode.shouldResume();
             if (closeCode.shouldWarn()) {
-                if (closeCode == CloseCode.BROKEN) {
+                if (closeCode == CloseCode.ABNORMAL) {
                     log.warn("Connection closed due to internet issues?");
                 } else {
                     log.warn("Connection closed due to {} {}. This could indicate an issue with the magma library or "

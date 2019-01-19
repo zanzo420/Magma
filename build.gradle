@@ -32,7 +32,7 @@ apply plugin: 'com.github.ben-manes.versions'
 
 
 group = 'club.minnced'
-version = "0.9.0"
+version = '0.9.1'
 archivesBaseName = project.name
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -178,21 +178,5 @@ idea {
             addCompileOnlyDependencies = false
             mainDependenciesScope = 'PROVIDED'
         }
-    }
-}
-
-//returns either a git tag if there is one on this commit, or the commit hash, to be used as a version
-@SuppressWarnings("GrMethodMayBeStatic")
-String versionFromTag() {
-    def headTag = grgit.tag.list().find {
-        it.commit == grgit.head()
-    }
-
-    def clean = grgit.status().clean //uncommited changes? -> should be SNAPSHOT
-
-    if (headTag && clean) {
-        headTag.getName()
-    } else {
-        "${grgit.head().id}-SNAPSHOT"
     }
 }

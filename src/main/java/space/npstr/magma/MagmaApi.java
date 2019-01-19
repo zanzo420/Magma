@@ -16,6 +16,7 @@
 
 package space.npstr.magma;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import org.xnio.OptionMap;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Flux;
 import space.npstr.magma.events.api.MagmaEvent;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.function.Function;
 
 /**
@@ -94,6 +96,18 @@ public interface MagmaApi {
      * @see Member
      */
     void setSendHandler(final Member member, final AudioSendHandler sendHandler);
+
+    /**
+     * The {@link space.npstr.magma.SpeakingMode SpeakingMode} to use.
+     *
+     * @param member
+     *         user id + guild id of the bot member for which the send handler shall be set
+     * @param mode
+     *         EnumSet containing the speaking modes to apply
+     *
+     * @see Member
+     */
+    void setSpeakingMode(final Member member, @Nullable final EnumSet<SpeakingMode> mode);
 
     /**
      * Remove the {@link AudioSendHandler} for a bot member.

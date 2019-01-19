@@ -16,6 +16,7 @@
 
 package space.npstr.magma;
 
+import edu.umd.cs.findbugs.annotations.CheckReturnValue;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +25,11 @@ import space.npstr.magma.connections.AudioConnection;
 import space.npstr.magma.connections.AudioWebSocket;
 import space.npstr.magma.connections.hax.ClosingWebSocketClient;
 import space.npstr.magma.events.api.MagmaEvent;
-import space.npstr.magma.events.audio.lifecycle.CloseWebSocket;
-import space.npstr.magma.events.audio.lifecycle.ConnectWebSocketLcEvent;
-import space.npstr.magma.events.audio.lifecycle.LifecycleEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
-import space.npstr.magma.events.audio.lifecycle.UpdateSendHandler;
-import space.npstr.magma.events.audio.lifecycle.VoiceServerUpdate;
+import space.npstr.magma.events.audio.lifecycle.*;
 import space.npstr.magma.immutables.ImmutableSessionInfo;
 
-import javax.annotation.CheckReturnValue;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -109,13 +105,16 @@ public class AudioStackLifecyclePipeline extends BaseSubscriber<LifecycleEvent> 
             this.audioStacks.values().stream().flatMap(map -> map.values().stream()).forEach(
                     audioStack -> audioStack.next(event)
             );
+        } else if (event instanceof UpdateSpeakingMode) {
+            this.getAudioStack(event)
+                .next(event);
         } else {
             log.warn("Unhandled lifecycle event of class {}", event.getClass().getSimpleName());
         }
     }
 
     @CheckReturnValue
-    public Collection<WebsocketConnectionState> getAudioConnectionStates() {
+    public List<WebsocketConnectionState> getAudioConnectionStates() {
         return this.audioStacks.entrySet().stream()
                 .flatMap(outerEntry -> {
                     final String userId = outerEntry.getKey();

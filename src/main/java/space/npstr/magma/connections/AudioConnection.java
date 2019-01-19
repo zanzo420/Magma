@@ -16,6 +16,7 @@
 
 package space.npstr.magma.connections;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import net.dv8tion.jda.core.audio.factory.IAudioSendSystem;
@@ -29,22 +30,17 @@ import reactor.core.publisher.UnicastProcessor;
 import reactor.core.scheduler.Schedulers;
 import space.npstr.magma.EncryptionMode;
 import space.npstr.magma.MdcKey;
-import space.npstr.magma.events.audio.conn.ConnectionEvent;
-import space.npstr.magma.events.audio.conn.SetEncryptionMode;
-import space.npstr.magma.events.audio.conn.SetSecretKey;
-import space.npstr.magma.events.audio.conn.SetSsrc;
-import space.npstr.magma.events.audio.conn.SetTargetAddress;
+import space.npstr.magma.SpeakingMode;
 import space.npstr.magma.events.audio.conn.Shutdown;
-import space.npstr.magma.events.audio.conn.UpdateSendHandler;
-import space.npstr.magma.events.audio.conn.UpdateSpeaking;
+import space.npstr.magma.events.audio.conn.*;
 import space.npstr.magma.processing.PacketProvider;
 
-import javax.annotation.Nullable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -73,6 +69,7 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
     private final AudioWebSocket webSocket;
     private final DatagramSocket udpSocket;
     private final FluxSink<ConnectionEvent> audioConnectionEventSink;
+    private EnumSet<SpeakingMode> speakingModes = EnumSet.of(SpeakingMode.VOICE);
 
     // udp connection info
     @Nullable
@@ -121,6 +118,17 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
     // #                            API of this class
     // ################################################################################
 
+    public EnumSet<SpeakingMode> getSpeakingModes() {
+        return speakingModes;
+    }
+
+    public void setSpeakingModes(@Nullable EnumSet<SpeakingMode> speakingModes) {
+        this.speakingModes = speakingModes == null
+                             ? EnumSet.of(SpeakingMode.VOICE)
+                             : speakingModes.isEmpty()
+                                ? EnumSet.of(SpeakingMode.VOICE)
+                                : speakingModes;
+    }
 
     public DatagramSocket getUdpSocket() {
         return this.udpSocket;
@@ -180,7 +188,7 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
      * differs from the speaking state at the time this event is processed by the connection.
      */
     public void updateSpeaking(final boolean shouldSpeak) {
-        this.audioConnectionEventSink.next(shouldSpeak ? UpdateSpeaking.TRUE : UpdateSpeaking.FALSE);
+        this.audioConnectionEventSink.next(new UpdateSpeaking(shouldSpeak, speakingModes));
     }
 
     public void shutdown() {
@@ -234,14 +242,14 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
 
     private void handleSpeakingUpdate(final UpdateSpeaking event) {
         if (this.speaking != event.shouldSpeak()) {
-            this.setSpeaking(event.shouldSpeak());
+            this.setSpeaking(event.getSpeakingMode());
         }
     }
 
-    private void setSpeaking(final boolean speaking) {
+    private void setSpeaking(final int speaking) {
         if (this.ssrc != null) {
             log.trace("Setting speaking to {}", speaking);
-            this.speaking = speaking;
+            this.speaking = speaking != 0;
             this.webSocket.setSpeaking(speaking, this.ssrc);
         } else {
             log.trace("Not setting speaking to {} due to missing ssrc", speaking);
@@ -250,7 +258,7 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
 
     private void handleShutdown() {
         log.trace("Shutting down");
-        this.setSpeaking(false);
+        this.setSpeaking(0);
         this.tearDownSendComponents();
 
         this.encryptionMode = null;

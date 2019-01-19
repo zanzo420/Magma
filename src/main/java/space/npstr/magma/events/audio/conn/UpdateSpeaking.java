@@ -16,22 +16,27 @@
 
 package space.npstr.magma.events.audio.conn;
 
+import space.npstr.magma.SpeakingMode;
+
+import java.util.EnumSet;
+
 /**
  * Created by napster on 21.06.18.
  */
-public enum UpdateSpeaking implements ConnectionEvent {
-
-    TRUE(true),
-    FALSE(false);
-
+public class UpdateSpeaking implements ConnectionEvent {
     private final boolean shouldSpeak;
+    private final EnumSet<SpeakingMode> modes;
 
-    UpdateSpeaking(final boolean shouldSpeak) {
+    public UpdateSpeaking(boolean shouldSpeak, EnumSet<SpeakingMode> modes) {
         this.shouldSpeak = shouldSpeak;
+        this.modes = modes;
     }
 
     public boolean shouldSpeak() {
         return this.shouldSpeak;
     }
 
+    public int getSpeakingMode() {
+        return shouldSpeak ? SpeakingMode.toMask(modes) : 0;
+    }
 }
