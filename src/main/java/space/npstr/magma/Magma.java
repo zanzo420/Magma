@@ -40,8 +40,8 @@ import space.npstr.magma.events.api.WebSocketClosedApiEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
 
-import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -153,7 +153,7 @@ public class Magma implements MagmaApi {
     }
 
     @Override
-    public Collection<WebsocketConnectionState> getAudioConnectionStates() {
+    public List<WebsocketConnectionState> getAudioConnectionStates() {
         return this.lifecyclePipeline.getAudioConnectionStates();
     }
 

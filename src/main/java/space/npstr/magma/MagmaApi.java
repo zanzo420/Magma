@@ -24,8 +24,8 @@ import org.xnio.XnioWorker;
 import reactor.core.publisher.Flux;
 import space.npstr.magma.events.api.MagmaEvent;
 
-import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -131,8 +131,8 @@ public interface MagmaApi {
 
 
     /**
-     * @return a collection of all {@link WebsocketConnectionState}s detailing the state of
-     * the {@link AudioStack}s managed by this {@link MagmaApi} instance
+     * @return a list of all {@link WebsocketConnectionState WebsocketConnectionStates} detailing the state of
+     * the {@link AudioStack AudioStacks} managed by this {@link MagmaApi} instance
      */
-    Collection<WebsocketConnectionState> getAudioConnectionStates();
+    List<WebsocketConnectionState> getAudioConnectionStates();
 }
