@@ -101,7 +101,7 @@ public interface MagmaApi {
      * The {@link space.npstr.magma.SpeakingMode SpeakingMode} to use.
      *
      * @param member
-     *         user id + guild id of the bot member for which the send handler shall be set
+     *         user id + guild id of the bot member for which the speaking mode shall be set
      * @param mode
      *         EnumSet containing the speaking modes to apply
      *
