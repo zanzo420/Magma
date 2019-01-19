@@ -1,9 +1,7 @@
 # Magma
 
-[![Release](https://img.shields.io/github/tag/napstr/Magma.svg)](https://jitpack.io/#space.npstr/Magma)
-[![Build Status Master Branch](https://travis-ci.com/napstr/Magma.svg?branch=master)](https://travis-ci.org/napstr/Magma/branches)
-[![License](https://img.shields.io/github/license/napstr/Magma.svg)]()
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=space.npstr.magma%3Amagma&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=space.npstr.magma%3Amagma)
+[ ![version](https://api.bintray.com/packages/minndevelopment/maven/magma/images/download.svg) ](https://bintray.com/minndevelopment/maven/magma/_latestVersion)
+![License](https://img.shields.io/github/license/minndevelopment/Magma.svg)
 
 A voice only API for Discord, focused on delivering music at scale.
 
@@ -44,18 +42,20 @@ Recommended providers:
 
 ### Add Magma to your project
 
-- [JitPack](https://jitpack.io/#space.npstr/Magma) for builds straight from github code
+- [JCenter](https://bintray.com/minndevelopment/maven/magma) for builds straight from github code
 
-Replace `x.y.z` in the snippets below with the desired version. Latest: [![Release](https://img.shields.io/github/tag/napstr/Magma.svg)](https://jitpack.io/#space.npstr/Magma)
+Replace `x.y.z` in the snippets below with the desired version.
+
+Latest: [ ![version](https://api.bintray.com/packages/minndevelopment/maven/magma/images/download.svg) ](https://bintray.com/minndevelopment/maven/magma/_latestVersion)
 
 ###### Gradle build.gradle
 ```groovy
     repositories {
-        maven { url 'https://jitpack.io' }
+       jcenter()
     }
 
     dependencies {
-        compile group: 'space.npstr', name: 'Magma', version: 'x.y.z'
+        compile group: 'club.minnced', name: 'magma', version: 'x.y.z'
     }
 ```
 
@@ -63,14 +63,14 @@ Replace `x.y.z` in the snippets below with the desired version. Latest: [![Relea
 ```xml
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>        
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
     </repositories>
 
     <dependency>
-        <groupId>space.npstr</groupId>
-        <artifactId>Magma</artifactId>
+        <groupId>club.minnced</groupId>
+        <artifactId>magma</artifactId>
         <version>x.z.y</version>
     </dependency>
 ```
@@ -87,8 +87,8 @@ that you want to open/close/change something about.
 
 Magma uses [immutables.org](http://immutables.org/) to ensure type and parameter safety,
 both internally and in the Api you are going to use.
-Concretely, the Api makes use of immutable [Member](https://github.com/napstr/Magma/blob/master/src/main/java/space/npstr/magma/Member.java)
-and [ServerUpdate](https://github.com/napstr/Magma/blob/master/src/main/java/space/npstr/magma/ServerUpdate.java) objects.
+Concretely, the Api makes use of immutable [Member](https://github.com/MinnDevelopment/Magma/blob/master/src/main/java/space/npstr/magma/Member.java)
+and [ServerUpdate](https://github.com/MinnDevelopment/Magma/blob/master/src/main/java/space/npstr/magma/ServerUpdate.java) objects.
 
 ```java
 
@@ -96,18 +96,17 @@ and [ServerUpdate](https://github.com/napstr/Magma/blob/master/src/main/java/spa
         .userId("...")
         .guildId("...")
         .build();
-    
+
     ServerUpdate = MagmaServerUpdate.builder()
         .sessionId("...")
         .endpoint("...")
         .token("...")
         .build();
-    
 ```
 
 #### Api
 
-Typical usage of the methods offered by the [MagmaApi](https://github.com/napstr/Magma/blob/master/src/main/java/space/npstr/magma/MagmaApi.java):
+Typical usage of the methods offered by the [MagmaApi](https://github.com/MinnDevelopment/Magma/blob/master/src/main/java/space/npstr/magma/MagmaApi.java):
 
 ```java
 
@@ -135,9 +134,9 @@ Typical usage of the methods offered by the [MagmaApi](https://github.com/napstr
 
     magmaApi.shutdown();
 
-    // Calling any other methods of a MagmaApi object after having called shutdown() 
+    // Calling any other methods of a MagmaApi object after having called shutdown()
     // will result in undefined behaviour. Do not do this, create a new MagmaApi instead.
-    // Please note that you are strongly encouraged to use a single MagmaApi object throughout 
+    // Please note that you are strongly encouraged to use a single MagmaApi object throughout
     // the lifecycle of your application.
 
 ```
@@ -145,7 +144,7 @@ Typical usage of the methods offered by the [MagmaApi](https://github.com/napstr
 None of those calls are blocking, as they are translated into events to be processed as soon as possible.
 Currently, there is no feedback as to when and how these are processed.
 
-You can subscribe to a stream of [MagmaEvent](https://github.com/napstr/Magma/blob/master/src/main/java/space/npstr/magma/events/api/MagmaEvent.java)s
+You can subscribe to a stream of [MagmaEvent](https://github.com/MinnDevelopment/Magma/blob/master/src/main/java/space/npstr/magma/events/api/MagmaEvent.java)s
 through `MagmaApi#getEventStream`:
 
 ```java
@@ -154,7 +153,7 @@ through `MagmaApi#getEventStream`:
                 .subscribe(this::handleMagmaEvent);
     ...
 
-    
+
     private void handleMagmaEvent(MagmaEvent magmaEvent) {
         if (magmaEvent instanceof space.npstr.magma.events.api.WebSocketClosed) {
             WebSocketClosed wsClosedEvent = (WebSocketClosed) magmaEvent;
@@ -190,7 +189,7 @@ Graphs by courtesy of [FredBoat](https://github.com/Frederikam/FredBoat/).
 #### Garbage Collection
 <details><summary>Click me</summary>
 
-![GC Time Spent](https://i.imgur.com/X7yC5xh.png)  
+![GC Time Spent](https://i.imgur.com/X7yC5xh.png)
 ![GC Runs](https://i.imgur.com/pLKH2hA.png)
 
 </details>
@@ -214,7 +213,7 @@ Graphs by courtesy of [FredBoat](https://github.com/Frederikam/FredBoat/).
 ## Debugging
 
 Enabling TRACE/DEBUG logs can help with pinpointing and reporting issues.
-To get the most out of these log levels, make sure your chosen logger implementation and configuration 
+To get the most out of these log levels, make sure your chosen logger implementation and configuration
 prints additional MDC information. The MDC keys that Magma uses can be found in the `MdcKeys` class.
 
 If you are running Magma in a Spring Boot application with logback as the logger implementation
@@ -226,13 +225,16 @@ logging:
   pattern:
     level: "[%mdc] %5p"
   level:
-    space.npstr.magma: TRACE 
+    space.npstr.magma: TRACE
 ```
 
 
 ## Changelog
 
 Expect breaking changes between minor versions while v1 has not been released.
+
+### v0.9.0
+- Support java 8 through 10
 
 ### v0.8.3
 - Fix bug with reconnecting in the same guild introduced in 0.8.2
