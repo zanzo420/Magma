@@ -46,7 +46,7 @@ public class AudioWebSocketSessionHandler extends BaseSubscriber<OutboundWsEvent
 
     /**
      * @param inbound
-     *         Subcriber to the events we will receive from Discord
+     *         Subscriber to the events we will receive from Discord
      */
     public AudioWebSocketSessionHandler(final Subscriber<InboundWsEvent> inbound) {
         this.prepareConnect();
