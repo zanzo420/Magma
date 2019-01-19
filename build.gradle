@@ -51,6 +51,8 @@ ext {
 
     springVersion               = '5.1.1.RELEASE'
     undertowVersion             = '2.0.14.Final'
+    xnioVersion                 = '3.3.8.Final'
+    reactorVersion              = '3.2.1.RELEASE'
 
     spotbugsVersion             = '3.1.8'
     annotationsVersion          = '0.0.1'
@@ -64,20 +66,22 @@ ext {
 
 dependencies {
     //@formatter:off
-    compile             group: 'org.json',              name: 'json',                   version: orgJsonVersion
-    compile             group: 'org.slf4j',             name: 'slf4j-api',              version: slf4jVersion
+    implementation      group: 'org.json',              name: 'json',                   version: orgJsonVersion
+    implementation      group: 'org.slf4j',             name: 'slf4j-api',              version: slf4jVersion
 
     // project reactor & reactive websocket client
-    compile             group: 'org.springframework',   name: 'spring-webflux',         version: springVersion
-    compile             group: 'io.undertow',           name: 'undertow-core',          version: undertowVersion
+    implementation      group: 'io.undertow',           name: 'undertow-core',          version: undertowVersion
+    api                 group: 'org.springframework',   name: 'spring-webflux',         version: springVersion
+    api                 group: 'org.jboss.xnio',        name: 'xnio-nio',               version: xnioVersion
+    api                 group: 'io.projectreactor',     name: 'reactor-core',           version: reactorVersion
 
     // annotations
     compileOnly         group: 'com.github.spotbugs',   name: 'spotbugs-annotations',   version: spotbugsVersion
     compileOnly         group: 'space.npstr',           name: 'annotations',            version: annotationsVersion //todo replace with findBugs
 
     // immutable objects, to pass values around
-    annotationProcessor group: 'org.immutables',        name: 'value',                  version: immutablesVersion
     compileOnly         group: 'org.immutables',        name: 'value',                  version: immutablesVersion, classifier: 'annotations'
+    annotationProcessor group: 'org.immutables',        name: 'value',                  version: immutablesVersion
 
     // testing
     testCompile         group: 'org.junit.jupiter',     name: 'junit-jupiter-api',      version: junitVersion
@@ -158,6 +162,8 @@ bintray {
         }
     }
 }
+
+defaultTasks 'build'
 
 bintrayUpload {
     dependsOn clean
