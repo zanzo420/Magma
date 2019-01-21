@@ -3,6 +3,11 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.9.1
+- Add speaking modes
+- Change transitive dependencies to proper api/implementation scopes
+- Fix several javadoc errors
+
 ### v0.9.0
 - Support java 8 through 10
 
