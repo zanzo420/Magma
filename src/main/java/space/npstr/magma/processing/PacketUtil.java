@@ -32,7 +32,7 @@ public class PacketUtil {
     private PacketUtil() {
     }
 
-    //this may reallocate the passed bytebuffer if it is too small
+    //this may reallocate the passed ByteBuffer if it is too small
     public static ByteBuffer encryptPacket(final AudioPacket audioPacket, final ByteBuffer packetBuffer,
                                            final EncryptionMode encryptionMode, final byte[] secretKey,
                                            final Supplier<Long> nonceSupplier, final byte[] nonceBuffer) {
@@ -43,7 +43,7 @@ public class PacketUtil {
                 nonceLength = 0;
                 break;
             case XSALSA20_POLY1305_LITE:
-                PacketUtil.writeNonce(nonceSupplier.get(), nonceBuffer);
+                writeNonce(nonceSupplier.get(), nonceBuffer);
                 nonceLength = 4;
                 break;
             case XSALSA20_POLY1305_SUFFIX:

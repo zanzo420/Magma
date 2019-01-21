@@ -16,6 +16,7 @@
 
 package space.npstr.magma;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import org.xnio.OptionMap;
@@ -23,7 +24,8 @@ import org.xnio.XnioWorker;
 import reactor.core.publisher.Flux;
 import space.npstr.magma.events.api.MagmaEvent;
 
-import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -96,6 +98,18 @@ public interface MagmaApi {
     void setSendHandler(final Member member, final AudioSendHandler sendHandler);
 
     /**
+     * The {@link space.npstr.magma.SpeakingMode SpeakingMode} to use.
+     *
+     * @param member
+     *         user id + guild id of the bot member for which the speaking mode shall be set
+     * @param mode
+     *         EnumSet containing the speaking modes to apply
+     *
+     * @see Member
+     */
+    void setSpeakingMode(final Member member, @Nullable final EnumSet<SpeakingMode> mode);
+
+    /**
      * Remove the {@link AudioSendHandler} for a bot member.
      *
      * @param member
@@ -117,8 +131,8 @@ public interface MagmaApi {
 
 
     /**
-     * @return a collection of all {@link WebsocketConnectionState}s detailing the state of
-     * the {@link AudioStack}s managed by this {@link MagmaApi} instance
+     * @return a list of all {@link WebsocketConnectionState WebsocketConnectionStates} detailing the state of
+     * the {@link AudioStack AudioStacks} managed by this {@link MagmaApi} instance
      */
-    Collection<WebsocketConnectionState> getAudioConnectionStates();
+    List<WebsocketConnectionState> getAudioConnectionStates();
 }

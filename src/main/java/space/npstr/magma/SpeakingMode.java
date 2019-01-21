@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Dennis Neufeld
+ *     Copyright 2015-2019 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-package space.npstr.magma.events.audio.conn;
+package space.npstr.magma;
 
-import space.npstr.magma.SpeakingMode;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 import java.util.EnumSet;
 
-/**
- * Created by napster on 21.06.18.
- */
-public class UpdateSpeaking implements ConnectionEvent {
-    private final boolean shouldSpeak;
-    private final EnumSet<SpeakingMode> modes;
+public enum SpeakingMode {
+    VOICE(1), SOUNDSHARE(2), PRIORITY(4);
 
-    public UpdateSpeaking(boolean shouldSpeak, EnumSet<SpeakingMode> modes) {
-        this.shouldSpeak = shouldSpeak;
-        this.modes = modes;
+    private final int key;
+
+    SpeakingMode(int key) {
+        this.key = key;
     }
 
-    public boolean shouldSpeak() {
-        return this.shouldSpeak;
+    public int getKey() {
+        return key;
     }
 
-    public int getSpeakingMode() {
-        return shouldSpeak ? SpeakingMode.toMask(modes) : 0;
+    public static int toMask(@Nullable EnumSet<SpeakingMode> mode) {
+        if (mode == null || mode.isEmpty())
+            return 0;
+        int mask = 0;
+        for (SpeakingMode m : mode)
+            mask |= m.getKey();
+        return mask;
     }
 }

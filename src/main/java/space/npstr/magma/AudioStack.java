@@ -16,6 +16,7 @@
 
 package space.npstr.magma;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
@@ -28,13 +29,10 @@ import reactor.core.scheduler.Schedulers;
 import space.npstr.magma.connections.AudioWebSocket;
 import space.npstr.magma.connections.hax.ClosingWebSocketClient;
 import space.npstr.magma.events.api.MagmaEvent;
-import space.npstr.magma.events.audio.lifecycle.CloseWebSocket;
-import space.npstr.magma.events.audio.lifecycle.ConnectWebSocket;
-import space.npstr.magma.events.audio.lifecycle.LifecycleEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
-import space.npstr.magma.events.audio.lifecycle.UpdateSendHandler;
+import space.npstr.magma.events.audio.lifecycle.*;
 
-import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.function.Consumer;
 
 /**
@@ -59,6 +57,8 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
     private AudioWebSocket webSocket;
     @Nullable
     private AudioSendHandler sendHandler;
+    @Nullable
+    private EnumSet<SpeakingMode> speakingModes;
 
 
     public AudioStack(final Member member, final IAudioSendFactory sendFactory,
@@ -108,8 +108,10 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
                 this.handleCloseWebSocket((CloseWebSocket) event);
             } else if (event instanceof Shutdown) {
                 this.handleShutdown();
+            } else if (event instanceof UpdateSpeakingMode) {
+                this.handleUpdateSpeakingMode(((UpdateSpeakingMode) event).getSpeakingModes());
             } else {
-                log.warn("Audiostack has no handler for lifecycle event of class {}", event.getClass().getSimpleName());
+                log.warn("AudioStack has no handler for lifecycle event of class {}", event.getClass().getSimpleName());
             }
         }
 
@@ -133,6 +135,9 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
                 this.webSocketClient, this::next);
         if (this.sendHandler != null) {
             this.webSocket.getAudioConnection().updateSendHandler(this.sendHandler);
+        }
+        if (this.speakingModes != null) {
+            this.webSocket.getAudioConnection().setSpeakingModes(this.speakingModes);
         }
     }
 
@@ -163,5 +168,13 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
             this.webSocket = null;
         }
         this.sendHandler = null;
+        this.speakingModes = null;
+    }
+
+    private void handleUpdateSpeakingMode(@Nullable EnumSet<SpeakingMode> mode) {
+        this.speakingModes = mode;
+        if (this.webSocket != null) {
+            this.webSocket.getAudioConnection().setSpeakingModes(mode);
+        }
     }
 }

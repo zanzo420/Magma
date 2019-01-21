@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Dennis Neufeld
+ *     Copyright 2015-2019 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package space.npstr.magma.events.audio.conn;
+package space.npstr.magma.events.audio.lifecycle;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
+import org.immutables.value.Value;
+import space.npstr.magma.Member;
 import space.npstr.magma.SpeakingMode;
+import space.npstr.magma.immutables.ImmutableLcEvent;
 
 import java.util.EnumSet;
 
-/**
- * Created by napster on 21.06.18.
- */
-public class UpdateSpeaking implements ConnectionEvent {
-    private final boolean shouldSpeak;
-    private final EnumSet<SpeakingMode> modes;
-
-    public UpdateSpeaking(boolean shouldSpeak, EnumSet<SpeakingMode> modes) {
-        this.shouldSpeak = shouldSpeak;
-        this.modes = modes;
-    }
-
-    public boolean shouldSpeak() {
-        return this.shouldSpeak;
-    }
-
-    public int getSpeakingMode() {
-        return shouldSpeak ? SpeakingMode.toMask(modes) : 0;
-    }
+@Value.Immutable
+@ImmutableLcEvent
+public abstract class UpdateSpeakingMode implements LifecycleEvent {
+    @Override
+    public abstract Member getMember();
+    @Nullable
+    public abstract EnumSet<SpeakingMode> getSpeakingModes();
 }

@@ -16,6 +16,7 @@
 
 package space.npstr.magma;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
@@ -36,14 +37,11 @@ import space.npstr.magma.connections.hax.ClosingUndertowWebSocketClient;
 import space.npstr.magma.connections.hax.ClosingWebSocketClient;
 import space.npstr.magma.events.api.MagmaEvent;
 import space.npstr.magma.events.api.WebSocketClosedApiEvent;
-import space.npstr.magma.events.audio.lifecycle.CloseWebSocketLcEvent;
-import space.npstr.magma.events.audio.lifecycle.LifecycleEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
-import space.npstr.magma.events.audio.lifecycle.UpdateSendHandlerLcEvent;
-import space.npstr.magma.events.audio.lifecycle.VoiceServerUpdateLcEvent;
+import space.npstr.magma.events.audio.lifecycle.*;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -129,6 +127,14 @@ public class Magma implements MagmaApi {
     }
 
     @Override
+    public void setSpeakingMode(final Member member, @Nullable final EnumSet<SpeakingMode> mode) {
+        this.lifecycleSink.next(UpdateSpeakingModeLcEvent.builder()
+                .member(member)
+                .speakingModes(mode)
+                .build());
+    }
+
+    @Override
     public void removeSendHandler(final Member member) {
         this.updateSendHandler(member, null);
     }
@@ -147,7 +153,7 @@ public class Magma implements MagmaApi {
     }
 
     @Override
-    public Collection<WebsocketConnectionState> getAudioConnectionStates() {
+    public List<WebsocketConnectionState> getAudioConnectionStates() {
         return this.lifecyclePipeline.getAudioConnectionStates();
     }
 
