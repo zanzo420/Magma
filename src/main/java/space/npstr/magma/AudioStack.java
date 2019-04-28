@@ -31,6 +31,7 @@ import space.npstr.magma.connections.hax.ClosingWebSocketClient;
 import space.npstr.magma.events.api.MagmaEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
+import space.npstr.magma.immutables.ImmutableApiEvent;
 
 import java.util.EnumSet;
 import java.util.function.Consumer;
@@ -86,6 +87,10 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
         this.lifecycleSink.next(event);
     }
 
+    public void nextApi(final MagmaEvent event) {
+        this.apiEventConsumer.accept(event);
+    }
+
     public WebsocketConnectionState.Phase getConnectionPhase() {
         final AudioWebSocket socket = this.webSocket;
         if (socket != null) {
@@ -132,7 +137,7 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
         }
 
         this.webSocket = new AudioWebSocket(this.sendFactory, connectWebSocket.getSessionInfo(),
-                this.webSocketClient, this::next);
+                this.webSocketClient, this::next, this::nextApi);
         if (this.sendHandler != null) {
             this.webSocket.getAudioConnection().updateSendHandler(this.sendHandler);
         }
