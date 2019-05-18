@@ -3,6 +3,9 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.9.2
+- Fix handling of 4014 close code
+
 ### v0.9.1
 - Add speaking modes
 - Change transitive dependencies to proper api/implementation scopes
