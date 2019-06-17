@@ -3,6 +3,9 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.10.1
+- Fix incorrect handling of ByteBuffer in asDatagramPacket
+
 ### v0.10.0
 - Restructure for JDA V4 compatibility
 
