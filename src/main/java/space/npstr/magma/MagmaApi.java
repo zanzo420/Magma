@@ -17,8 +17,8 @@
 package space.npstr.magma;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import org.xnio.OptionMap;
 import org.xnio.XnioWorker;
 import reactor.core.publisher.Flux;
