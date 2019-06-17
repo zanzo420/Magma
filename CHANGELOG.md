@@ -3,6 +3,9 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.10.0
+- Restructure for JDA V4 compatibility
+
 ### v0.9.2
 - Fix handling of 4014 close code
 
