@@ -261,6 +261,7 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
         this.setSpeaking(0);
         this.tearDownSendComponents();
 
+        this.udpSocket.close();
         this.encryptionMode = null;
         this.secretKey = null;
         this.ssrc = null;
