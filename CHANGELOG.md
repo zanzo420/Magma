@@ -3,6 +3,9 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.10.2
+- Fix possible memory leak due to unclosed datagram sockets
+
 ### v0.10.1
 - Fix incorrect handling of ByteBuffer in asDatagramPacket
 
