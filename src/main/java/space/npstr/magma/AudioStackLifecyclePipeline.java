@@ -29,6 +29,7 @@ import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
 import space.npstr.magma.immutables.ImmutableSessionInfo;
 
+import java.net.DatagramSocket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,13 +81,16 @@ public class AudioStackLifecyclePipeline extends BaseSubscriber<LifecycleEvent> 
     private final Function<Member, IAudioSendFactory> sendFactoryProvider;
     private final ClosingWebSocketClient webSocketClient;
     private final Consumer<MagmaEvent> apiEventConsumer;
+    private final DatagramSocket udpSocket;
 
     public AudioStackLifecyclePipeline(final Function<Member, IAudioSendFactory> sendFactoryProvider,
                                        final ClosingWebSocketClient webSocketClient,
-                                       final Consumer<MagmaEvent> apiEventConsumer) {
+                                       final Consumer<MagmaEvent> apiEventConsumer,
+                                       final DatagramSocket udpSocket) {
         this.sendFactoryProvider = sendFactoryProvider;
         this.webSocketClient = webSocketClient;
         this.apiEventConsumer = apiEventConsumer;
+        this.udpSocket = udpSocket;
     }
 
     @Override
@@ -151,6 +155,7 @@ public class AudioStackLifecyclePipeline extends BaseSubscriber<LifecycleEvent> 
                         new AudioStack(lifecycleEvent.getMember(),
                                 this.sendFactoryProvider.apply(lifecycleEvent.getMember()),
                                 this.webSocketClient,
-                                apiEventConsumer));
+                                this.apiEventConsumer,
+                                this.udpSocket));
     }
 }

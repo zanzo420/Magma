@@ -24,6 +24,7 @@ import org.xnio.XnioWorker;
 import reactor.core.publisher.Flux;
 import space.npstr.magma.events.api.MagmaEvent;
 
+import java.net.DatagramSocket;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
@@ -56,6 +57,14 @@ public interface MagmaApi {
                        final OptionMap xnioOptions) {
         return new Magma(sendFactoryProvider, xnioOptions);
     }
+
+    /**
+     * The UDP client used to NAT hole punch.
+     * <br>This is closed by {@link #shutdown()}.
+     *
+     * @return The DatagramSocket
+     */
+    DatagramSocket getDatagramSocket();
 
     /**
      * Release all resources held.
