@@ -17,7 +17,7 @@
 package space.npstr.magma;
 
 import edu.umd.cs.findbugs.annotations.CheckReturnValue;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.BaseSubscriber;
@@ -29,6 +29,7 @@ import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
 import space.npstr.magma.immutables.ImmutableSessionInfo;
 
+import java.net.DatagramSocket;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +46,8 @@ import java.util.stream.Collectors;
  * <ul>
  *   <li>A websocket connection ( {@literal ->} {@link AudioWebSocket}</li>
  *   <li>A voice packet emitter ( {@literal ->} {@link AudioConnection}</li>
- *   <li>A send handler         ( {@literal ->} {@link net.dv8tion.jda.core.audio.AudioSendHandler}, provided by user code)</li>
- *   <li>A send system          ( {@literal ->} {@link net.dv8tion.jda.core.audio.factory.IAudioSendSystem}, provided by user code)</li>
+ *   <li>A send handler         ( {@literal ->} {@link net.dv8tion.jda.api.audio.AudioSendHandler}, provided by user code)</li>
+ *   <li>A send system          ( {@literal ->} {@link net.dv8tion.jda.api.audio.factory.IAudioSendSystem}, provided by user code)</li>
  * </ul>
  *
  * <h2>Lifecycle Events</h2>
@@ -80,13 +81,16 @@ public class AudioStackLifecyclePipeline extends BaseSubscriber<LifecycleEvent> 
     private final Function<Member, IAudioSendFactory> sendFactoryProvider;
     private final ClosingWebSocketClient webSocketClient;
     private final Consumer<MagmaEvent> apiEventConsumer;
+    private final DatagramSocket udpSocket;
 
     public AudioStackLifecyclePipeline(final Function<Member, IAudioSendFactory> sendFactoryProvider,
                                        final ClosingWebSocketClient webSocketClient,
-                                       final Consumer<MagmaEvent> apiEventConsumer) {
+                                       final Consumer<MagmaEvent> apiEventConsumer,
+                                       final DatagramSocket udpSocket) {
         this.sendFactoryProvider = sendFactoryProvider;
         this.webSocketClient = webSocketClient;
         this.apiEventConsumer = apiEventConsumer;
+        this.udpSocket = udpSocket;
     }
 
     @Override
@@ -151,6 +155,7 @@ public class AudioStackLifecyclePipeline extends BaseSubscriber<LifecycleEvent> 
                         new AudioStack(lifecycleEvent.getMember(),
                                 this.sendFactoryProvider.apply(lifecycleEvent.getMember()),
                                 this.webSocketClient,
-                                apiEventConsumer));
+                                this.apiEventConsumer,
+                                this.udpSocket));
     }
 }

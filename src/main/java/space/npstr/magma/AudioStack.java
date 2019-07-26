@@ -17,8 +17,8 @@
 package space.npstr.magma;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -33,6 +33,7 @@ import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
 import space.npstr.magma.immutables.ImmutableApiEvent;
 
+import java.net.DatagramSocket;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
@@ -51,6 +52,7 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
     private final IAudioSendFactory sendFactory;
     private final ClosingWebSocketClient webSocketClient;
     private final Consumer<MagmaEvent> apiEventConsumer;
+    private final DatagramSocket udpSocket;
 
     private final FluxSink<LifecycleEvent> lifecycleSink;
 
@@ -63,7 +65,8 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
 
 
     public AudioStack(final Member member, final IAudioSendFactory sendFactory,
-                      final ClosingWebSocketClient webSocketClient, Consumer<MagmaEvent> apiEventConsumer) {
+                      final ClosingWebSocketClient webSocketClient, Consumer<MagmaEvent> apiEventConsumer,
+                      final DatagramSocket udpSocket) {
         this.member = member;
         this.sendFactory = sendFactory;
         this.webSocketClient = webSocketClient;
@@ -74,6 +77,7 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
         lifecycleProcessor
                 .publishOn(Schedulers.parallel())
                 .subscribe(this);
+        this.udpSocket = udpSocket;
     }
 
 
@@ -137,7 +141,7 @@ public class AudioStack extends BaseSubscriber<LifecycleEvent> {
         }
 
         this.webSocket = new AudioWebSocket(this.sendFactory, connectWebSocket.getSessionInfo(),
-                this.webSocketClient, this::next, this::nextApi);
+                this.webSocketClient, this::next, this.udpSocket, this::nextApi);
         if (this.sendHandler != null) {
             this.webSocket.getAudioConnection().updateSendHandler(this.sendHandler);
         }

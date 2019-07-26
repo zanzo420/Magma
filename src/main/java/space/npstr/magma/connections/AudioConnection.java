@@ -17,9 +17,9 @@
 package space.npstr.magma.connections;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
-import net.dv8tion.jda.core.audio.factory.IAudioSendSystem;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.factory.IAudioSendSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -38,7 +38,6 @@ import space.npstr.magma.processing.PacketProvider;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -93,13 +92,8 @@ public class AudioConnection extends BaseSubscriber<ConnectionEvent> {
     private final Supplier<Long> nonceSupplier;
     private boolean speaking = false;
 
-    public AudioConnection(final AudioWebSocket webSocket, final IAudioSendFactory sendFactory) {
-        try {
-            this.udpSocket = new DatagramSocket();
-        } catch (final SocketException e) {
-            throw new RuntimeException("Failed to create udpSocket", e);
-        }
-
+    public AudioConnection(final AudioWebSocket webSocket, final IAudioSendFactory sendFactory, final DatagramSocket udpSocket) {
+        this.udpSocket = udpSocket;
         this.webSocket = webSocket;
         this.sendFactory = sendFactory;
 

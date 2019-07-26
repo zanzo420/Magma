@@ -3,6 +3,21 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.10.3
+- Convert to single DatagramSocket shared by all audio pipelines
+
+### v0.10.2
+- Fix possible memory leak due to unclosed datagram sockets
+
+### v0.10.1
+- Fix incorrect handling of ByteBuffer in asDatagramPacket
+
+### v0.10.0
+- Restructure for JDA V4 compatibility
+
+### v0.9.2
+- Fix handling of 4014 close code
+
 ### v0.9.1
 - Add speaking modes
 - Change transitive dependencies to proper api/implementation scopes

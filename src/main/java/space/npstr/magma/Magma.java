@@ -21,8 +21,8 @@ import io.undertow.connector.ByteBufferPool;
 import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.OptionMap;
@@ -40,6 +40,7 @@ import space.npstr.magma.events.api.WebSocketClosedApiEvent;
 import space.npstr.magma.events.audio.lifecycle.Shutdown;
 import space.npstr.magma.events.audio.lifecycle.*;
 
+import java.net.DatagramSocket;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class Magma implements MagmaApi {
     private FluxSink<MagmaEvent> apiEventSink = null;
     private final Flux<MagmaEvent> apiEventFlux = Flux.create(sink -> apiEventSink = sink);
     private final AudioStackLifecyclePipeline lifecyclePipeline;
+    private final DatagramSocket udpSocket;
 
     /**
      * @see MagmaApi
@@ -75,6 +77,7 @@ public class Magma implements MagmaApi {
             final XnioSsl xnioSsl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY);
             final Consumer<WebSocketClient.ConnectionBuilder> builderConsumer = builder -> builder.setSsl(xnioSsl);
             webSocketClient = new ClosingUndertowWebSocketClient(xnioWorker, bufferPool, builderConsumer);
+            this.udpSocket = new DatagramSocket();
         } catch (final Exception e) {
             throw new RuntimeException("Failed to set up websocket client", e);
         }
@@ -84,7 +87,8 @@ public class Magma implements MagmaApi {
                 webSocketClient,
                 magmaEvent -> {
                     if (this.apiEventSink != null) this.apiEventSink.next(magmaEvent);
-                }
+                },
+                udpSocket
         );
 
         final UnicastProcessor<LifecycleEvent> processor = UnicastProcessor.create();
@@ -99,11 +103,17 @@ public class Magma implements MagmaApi {
     // #                            Public API
     // ################################################################################
 
+    @Override
+    public DatagramSocket getDatagramSocket()
+    {
+        return this.udpSocket;
+    }
 
     @Override
     public void shutdown() {
         this.lifecycleSink.next(Shutdown.INSTANCE);
         if (this.apiEventSink != null) this.apiEventSink.complete();
+        this.udpSocket.close();
     }
 
     @Override

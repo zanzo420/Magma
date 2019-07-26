@@ -17,7 +17,7 @@
 package space.npstr.magma.connections;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import net.dv8tion.jda.core.audio.factory.IAudioSendFactory;
+import net.dv8tion.jda.api.audio.factory.IAudioSendFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -45,6 +45,7 @@ import space.npstr.magma.events.audio.ws.in.*;
 import space.npstr.magma.events.audio.ws.out.*;
 import space.npstr.magma.immutables.SessionInfo;
 
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,14 +88,14 @@ public class AudioWebSocket extends BaseSubscriber<InboundWsEvent> {
 
     public AudioWebSocket(final IAudioSendFactory sendFactory, final SessionInfo session,
                           final ClosingWebSocketClient webSocketClient, final Consumer<CloseWebSocket> closeCallback,
-                          final Consumer<MagmaEvent> apiEventCallback) {
+                          final DatagramSocket udpSocket, final Consumer<MagmaEvent> apiEventCallback) {
         this.session = session;
         try {
             this.wssEndpoint = new URI(String.format("wss://%s/?v=4", session.getVoiceServerUpdate().getEndpoint()));
         } catch (final URISyntaxException e) {
             throw new RuntimeException("Endpoint " + session.getVoiceServerUpdate().getEndpoint() + " is not a valid URI", e);
         }
-        this.audioConnection = new AudioConnection(this, sendFactory);
+        this.audioConnection = new AudioConnection(this, sendFactory, udpSocket);
         this.closeCallback = closeCallback;
         this.webSocketClient = webSocketClient;
         this.apiEventCallback = apiEventCallback;
