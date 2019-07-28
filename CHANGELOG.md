@@ -3,6 +3,9 @@
 
 Expect breaking changes between minor versions while v1 has not been released.
 
+### v0.10.4
+- Fix xsalsa20_poly1305 encryption (legacy support)
+
 ### v0.10.3
 - Convert to single DatagramSocket shared by all audio pipelines
 
